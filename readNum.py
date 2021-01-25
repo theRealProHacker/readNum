@@ -2,54 +2,26 @@ import math
 from numbers import Number
 import decimal as decimals
 
-_maxDecimalLength=8
-def setPrecision(integer):
-    _maxDecimalLength=integer
+decimals.getcontext().prec = 8  
 def readNum(value):
     try:
         value
         if value is None:         #none
             return ("Your value is none")
-        elif isinstance(value,tuple):
+        elif isinstance(value,(tuple,list,set,dict)):
             if value:   #basically if not empty
                 output=[]
                 #print("Converting " +value.__class__.__name__+ " to list ...")
-                for x in value:
-                    output.append(readNum(x))
+                if isinstance(value,dict):
+                    for x in value:
+                        output.append(readNum(value[x]))
+                else:
+                    for x in value:
+                        output.append(readNum(x))
                 return output
             else:
                 pass
-                #print("This "+value.__class__.__name__+" is empty")
-        elif isinstance(value,list):
-            if value:   #basically if not empty
-                output=[]
-                #print("Converting " +value.__class__.__name__+ " to list ...")
-                for x in value:
-                    output.append(readNum(x))
-                return output
-            else:
-                pass
-                #print("This "+value.__class__.__name__+" is empty")
-        elif isinstance(value,dict):
-            if value:   #basically if not empty
-                output=[]
-                #print("Converting " +value.__class__.__name__+ " to list ...")
-                for x in value:
-                    output.append(readNum(value[x]))
-                return output
-            else:
-                pass
-                #print("This "+value.__class__.__name__+" is empty")
-        elif isinstance(value,set):
-            if value:   #basically if not empty
-                output=[]
-                #print("Converting " +value.__class__.__name__+ " to list ...")
-                for x in value:
-                    output.append(readNum(x))
-                return output
-            else:
-                pass
-                #print("This "+value.__class__.__name__+" is empty")
+                #print("This "+value.__class__.__name__+" is empty"        
         elif isinstance(value,Number): 
             if isinstance(value,decimals.Decimal):
                 if not value==int(value):   #real Decimal
@@ -99,7 +71,7 @@ def readInt(value):
         output.append("minus")
         value=-value
     local=str(value)   #string representation  
-    length=len(local)  #if value is dynamic define a max length instead. 
+    length=len(local)  
     if length > 24:
         return ("This int is too long")
     numbers=[]
@@ -150,8 +122,7 @@ def readInt(value):
                 output[i]=None
     return (' '.join(output)).strip()
 
-def readDecimal(decBig): #only give a decimal
-    decimals.getcontext().prec = _maxDecimalLength
+def readDecimal(decBig): #only give a decimal 
     output=[]
     single=_getSingleToString()
     single[0]="zero"
@@ -161,21 +132,21 @@ def readDecimal(decBig): #only give a decimal
         else:
             return readNum(int(decBig))
     except NameError:
-        raise Exception("Not defined"+str(type(decBig)))
+        raise Exception("Not defined "+str(type(decBig)))
     #decBig has an int component and a decimal places component
     intPart=int(decBig)
     if intPart==0 and decBig<0:
         output.append("negative")
     output.append(readInt(intPart))
     output.append("point")
-    decimalPart=abs(decBig-intPart)
+    decimalPart=abs(decBig-decimals.Decimal(intPart))
     decStr=str(decimalPart)
     isE=decStr.find('E')
     if (isE != -1): #format x.yz00000E-a
         Correct=decStr[-1:] #a
         decStr=decStr[:isE].replace(".","")
         zeroes=""
-        for i in range(int(Correct)):
+        for i in range(int(Correct)-1):
             zeroes=zeroes+str("0")
         decStr=zeroes+decStr
     else:       #format 0.xyz
