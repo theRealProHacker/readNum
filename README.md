@@ -1,17 +1,12 @@
 # readNum
 This python project turns a number into a readable spelled-out form
 
-You just have to download the [readNum.py file](https://github.com/theRealProHacker/readNum/blob/main/readNum.py)  
-and then do `import readNum` or `import readNum from readNum` in the file you need this module.  
+You just have to download [readNum.py file](https://github.com/theRealProHacker/readNum/blob/main/readNum.py)  
 And then you can get going. Drop any value into the `readNum`-function
-For Example:  
-`import readNum`  
-`myNumber=1`  
-`readNumber(myNumber)`  
+```python
+from readNum import readNum
+assert readNum(1) == "one"
+```
 
-This will return you "one"  
-So if you put in a value the function will return you that value as a String.  
-Only if you give the function a sequence (data structure) then it will return a processed list for you.  
-This module will not clog your print output because it does not print anything.
-
-You can find more examples in the [showcase.py file](https://github.com/theRealProHacker/readNum/blob/main/showcase.py).
+So if you put in a value the function will return that value as a `str`.  
+You can find more examples in [showcase.py](https://github.com/theRealProHacker/readNum/blob/main/showcase.py).
