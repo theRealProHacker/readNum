@@ -1,85 +1,66 @@
 import math
-from numbers import Number
 import decimal as decimals
+from collections.abc import Iterable
 
-decimals.getcontext().prec = 8  
-def readNum(value):
-    try:
-        value
-        if value is None:         #none
-            return ("Your value is none")
-        elif isinstance(value,(tuple,list,set,dict)):
-            if value:   #basically if not empty
-                output=[]
-                #print("Converting " +value.__class__.__name__+ " to list ...")
-                if isinstance(value,dict):
-                    for x in value:
-                        output.append(readNum(value[x]))
-                else:
-                    for x in value:
-                        output.append(readNum(x))
-                return output
+decimals.getcontext().prec = 8
+def readNum(value, on_nan = "Your value is not a number (NaN)"):
+    if isinstance(value,(int, float, complex, decimals.Decimal)): 
+        if math.isnan(value):
+            return on_nan
+        elif isinstance(value,decimals.Decimal):
+            if not value==int(value):   #real Decimal
+                return readDecimal(value)
             else:
-                pass
-                #print("This "+value.__class__.__name__+" is empty"        
-        elif isinstance(value,Number): 
-            if isinstance(value,decimals.Decimal):
-                if not value==int(value):   #real Decimal
-                    return readDecimal(value)   #this has to be the only read Decimal in the code instead redirect to readNum(Decimal(value))
-                else:               #Int
-                    return readInt(int(value))
-            elif isinstance(value,complex):
-                if value.imag:
-                    return("a complex number with a real part of "+readNum(value.real)+" and a imaginary part of "+readNum(value.imag))
-                else:
-                    try:
-                        return readNum(value.real)
-                    except:
-                        return ("There was a problem with your complex number. Do not use complex numbers with empty imaginary parts")
-            elif len(str(value))>32:
-                return ("This number is too long") 
-            elif math.isnan(value): #nan
-                return ("Your value is not a number (NaN)")
-            elif isinstance(value,float):
-                if not value.is_integer() and not value==int(value): #real float
-                    return readNum(decimals.Decimal.from_float(value))
-                else:   #integer
-                    return readInt(int(value))
-            elif isinstance(value,int):     #int
-                return readInt(value)
-        elif isinstance(value,str):
-                try:
-                    return readNum(decimals.Decimal(value))
-                except:
-                    if value.isnumeric():
-                        try:
-                            return readNum(int(value))
-                        except:
-                            try:
-                                return readNum(complex(value))
-                            except:
-                                return ("This is a String that is not convertible into a number")
-                    else:
-                        return  "This is a String that is not a number"
-    except NameError: #undefined
-        raise Exception("Your value is undefined")
-    return value
+                return readInt(int(value))
+        elif isinstance(value,complex):
+            try:
+                return("a complex number with a real part of "+readNum(value.real)+" and an imaginary part of "+readNum(value.imag))
+            except:
+                raise ValueError("There was a problem with your complex number.")
+        elif len(str(value))>32:
+            return ("This number is too long") 
+        elif isinstance(value,float):
+            if not value.is_integer() and not value==int(value): #real float
+                return readNum(decimals.Decimal.from_float(value))
+            else:   #integer
+                return readInt(int(value))
+        elif isinstance(value,int):
+            return readInt(value)
+    elif isinstance(value, str):
+        try:
+            return readNum(decimals.Decimal(value))
+        except ValueError:
+            try:
+                return readNum(complex(value))
+            except:
+                raise ValueError("String is not convertible into a number")
+    elif isinstance(value, Iterable):
+        return type(value)(map(readNum,value))
+    elif isinstance(value,dict):
+        return dict(
+            zip(
+                value.keys(),
+                map(readNum,value.values())
+            )
+        )
+    else:
+        raise TypeError("Unsupported type: "+type(value).__qualname__)
 
 def readInt(value):
     output=[]
     if value<0:
         output.append("minus")
         value=-value
-    local=str(value)   #string representation  
+    local=str(value)
     length=len(local)  
     if length > 24:
-        return ("This int is too long")
+        raise ValueError("This int is too long")
     numbers=[]
     for i in range(3): 
         numbers.insert(i,_getSingleToString())
     numbers[1][2]="twen";numbers[1][3]="thir";numbers[1][4]="for";numbers[1][5]="fif";numbers[1][8]="eigh";numbers[1][9]="nin"
     strings=["", "ty"," hundred"]
-    nextLevel=[" ","thousand","million","billion","trillion","quadrillion","quintillion","sextillion"] #and so on 
+    nextLevel=[" ","thousand","million","billion","trillion","quadrillion","quintillion","sextillion","septillion","octillion","nonillion","decillion","undecillion"] #and so on 
     array=[] #array representation
     lengthArr=math.ceil(length/3)
     for j in range(lengthArr):
@@ -105,9 +86,13 @@ def readInt(value):
                     2:"twelve",
                     3:"thirteen",
                     5:"fifteen"
-                } # this could have been implemented more efficiently maybe (see default)
+                }
                 teen=teenSwitch.get(array[i][2],numbers[2][array[i][2]]+"teen")
-                output.extend([numbers[2][array[i][0]]+strings[2],teen])
+                if array[i][0]==0:
+                    output.extend([teen])
+                else:
+                    output.extend([numbers[2][array[i][0]]+strings[2],teen])
+                inside=True
             else:
                 for j in range(3):
                     if not array[i][j]: #it might be (undefined or) 0 like in 003457
@@ -122,17 +107,11 @@ def readInt(value):
                 output[i]=None
     return (' '.join(output)).strip()
 
-def readDecimal(decBig): #only give a decimal 
+def readDecimal(decBig):
+    decBig = decimals.Decimal(decBig)
     output=[]
     single=_getSingleToString()
     single[0]="zero"
-    try:
-        if isinstance(decBig,decimals.Decimal):
-            pass
-        else:
-            return readNum(int(decBig))
-    except NameError:
-        raise Exception("Not defined "+str(type(decBig)))
     #decBig has an int component and a decimal places component
     intPart=int(decBig)
     if intPart==0 and decBig<0:
@@ -153,14 +132,7 @@ def readDecimal(decBig): #only give a decimal
         decStr=decStr[2:] #0.xyz is supposed to be xyz so cut the first two digits
     length=len(decStr)
     for x in decStr: 
-        try:
-            output.append(single[int(x)])
-        except TypeError:
-            pass
-            #print("Some insignificant problem occured: Still running")
-        except ValueError:
-            pass
-            #print("E couldn't be cast to an integer")
+        output.append(single[int(x)])
     length=len(output)
     for i in range(length-1,-1,-1):
         if output[i]=="zero" and i>0:
@@ -173,3 +145,12 @@ def _getSingleToString():
     return ["","one","two","three","four","five","six","seven","eight","nine"]
     
 
+if __name__ == '__main__':
+    while True:
+        a=input("Give a number? \n")
+        try:
+            c=readNum(eval(a))
+            print(c)
+        except Exception as e:
+            print("Not a valid number:")
+            print(e)
