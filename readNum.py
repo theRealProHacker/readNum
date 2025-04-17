@@ -53,14 +53,14 @@ def readInt(value):
         value=-value
     local=str(value)
     length=len(local)  
-    if length > 24:
+    if length > 60:
         raise ValueError("This int is too long")
     numbers=[]
     for i in range(3): 
         numbers.insert(i,_getSingleToString())
-    numbers[1][2]="twen";numbers[1][3]="thir";numbers[1][4]="for";numbers[1][5]="fif";numbers[1][8]="eigh";numbers[1][9]="nin"
+    numbers[1][2]="twen";numbers[1][3]="thir";numbers[1][4]="for";numbers[1][5]="fif";numbers[1][8]="eigh";numbers[1][9]="nine"
     strings=["", "ty"," hundred"]
-    nextLevel=[" ","thousand","million","billion","trillion","quadrillion","quintillion","sextillion","septillion","octillion","nonillion","decillion","undecillion"] #and so on 
+    nextLevel=[" ","thousand","million","billion","trillion","quadrillion","quintillion","sextillion","septillion","octillion","nonillion","decillion","undecillion","duodecillion","tredicillion","quarttuodecillion","quindecillion","sedicillion","septendecillion","octodecillion","novendecillion","vigintillion"] #and so on 
     array=[] #array representation
     lengthArr=math.ceil(length/3)
     for j in range(lengthArr):
